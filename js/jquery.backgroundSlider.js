@@ -55,16 +55,17 @@
                 $(el.find('li')).each(function(index, _el) {
                     $(_el).css({
                         position: 'absolute',
-                        top: '0px',
-                        left: '0px'
+                        top: "0px",
+                        left:"0px"
                     });
                     if (index != _o.current) {
                         $(_el).css({opacity:0});
+                    } else {
+                        __.scaleCrop(_el);
+                        // __.centerX($(_el));
+                        // __.centerY($(_el));
                     }
                 });
-                var _li = $($(el).find('li')[_o.current]);
-                __.scaleCrop(_li);
-                __.center(_li);
             },
             
             nextSlide: function(el) {
@@ -98,8 +99,6 @@
                 var nextStopLeft = ((0 - (nextWidth / 2)) + ($(window).width() / 2)).toString();
                 // figure where top and left will animate to for current slide
                 var currentStopLeft = nextStopLeft - currentWidth;
-                console.log("old slide: " + _o.current);
-                console.log("new slide: " + nextIndex);
                 nextLi.animate({left:nextStopLeft+"px"}, _o.animationTime, _o.easing);
                 currentLi.animate({left:currentStopLeft+"px"}, _o.animationTime, _o.easing, function() {
                     currentLi.css({opacity:0});
@@ -119,8 +118,6 @@
             },
             
             switchHandler: function(el) {
-                console.log("in the timer");
-                console.log("_o.sliding: " + _o.sliding)
                 var _sTmr = null;
                 if (_sTmr) {
                     clearTimeout(_sTmr);
