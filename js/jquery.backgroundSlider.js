@@ -70,16 +70,16 @@
                     });
                     __.matchInnerOuter($_el);
                     if (index != _o.current) {
-                        console.log("fixing " + index);
+                        // console.log("fixing " + index);
                         $_el.css({opacity:0, zIndex: 98});
                     } else {
-                        console.log("fixing first");
-                        console.log($_el.css("top"), $_el.css("left"), $_el.width(), $_el.height());
-                        __.scaleCrop($_el);
-                        __.centerX($_el);
-                        __.centerY($_el);
+                        // console.log("fixing first");
+                        // console.log($_el.css("top"), $_el.css("left"), $_el.width(), $_el.height());
+                        //__.scaleCrop($_el);
+                        //__.centerX($_el);
+                        //__.centerY($_el);
                         $_el.css({zIndex: 100});
-                        console.log($_el.css("top"), $_el.css("left"), $_el.width(), $_el.height());
+                        // console.log($_el.css("top"), $_el.css("left"), $_el.width(), $_el.height());
                     }
                 });
             },
@@ -128,10 +128,10 @@
                     // 'reveal' old slide underneath new one.
                     __.centerX(nextLi);
                     nextLi.css({zIndex:99,opacity:1});
-                    console.log("set opacity of next to 1");
+                    // console.log("set opacity of next to 1");
                     var currentStopLeft = parseInt(nextLi.css("left").replace("px", "")) - currentWidth;
                     currentLi.animate({left:currentStopLeft+"px"}, _o.animationTime, _o.easing, function() {
-                        console.log("done animating");
+                        // console.log("done animating");
                         currentLi.css({opacity:0, zIndex:98});
                         nextLi.css({zIndex:100});
                         _o.current = nextIndex;
