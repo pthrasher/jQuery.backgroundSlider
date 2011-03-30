@@ -45,9 +45,9 @@
                 });
             },
             centerY: function(li) {
-                img = $(li.find('img:first')),
-        	    wH = $(window).height(),
-        	    iH = img.height(),
+                var img = $(li.find('img:first')),
+            	    wH = $(window).height(),
+            	    iH = img.height();
                 li.css({
     				top:((0 - (iH / 2)) + (wH / 2)).toString() + "px"
                 });
