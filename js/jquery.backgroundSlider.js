@@ -54,11 +54,11 @@
             },
             matchInnerOuter: function(li) {
                 var $li = $(li),
-                    img = $li.find('img:first')),
+                    img = $($li.find('img:first')),
             	    iH = img.height(),
             	    iW = img.width();
-            	$li.width(iw);
-            	$li.height(ih);
+            	$li.width(iW);
+            	$li.height(iH);
             },
             showFirstSlide: function(el) {
                 $(el.find('li')).each(function(index, _el) {
