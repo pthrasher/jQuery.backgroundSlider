@@ -69,7 +69,6 @@
                         top: "0px",
                         left:"0px"
                     });
-                    __.matchInnerOuter($_el);
                     if (index != _o.current) {
                         $_el.css({opacity:0, zIndex: 98});
                     } else {
