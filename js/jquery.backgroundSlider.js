@@ -108,7 +108,6 @@
                 
                 // If we want the new slide to 'push' the old slide out.
                 if (_o.animType == "sidebyside") {
-                    console.log("sidebyside");
                     // set left of next slide to the right edge of the current slide
                     nextLi.css({
                         left:(parseInt(currentLeft.replace("px", ""))+currentWidth)+"px",
@@ -125,7 +124,6 @@
                         _o.sliding = false;
                     });
                 } else {
-                    console.log("reveal");
                     // 'reveal' old slide underneath new one.
                     __.centerX(nextLi);
                     nextLi.css({zIndex:99,opacity:1});
