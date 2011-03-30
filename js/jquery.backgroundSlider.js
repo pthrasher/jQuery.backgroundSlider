@@ -5,7 +5,8 @@
             delay: 6000,
             animationTime: 600,
             current: 0,
-            sliding: false
+            sliding: false,
+            animType: "reveal"
         }, $o),
         
         __ = {
@@ -59,11 +60,12 @@
                         left:"0px"
                     });
                     if (index != _o.current) {
-                        $(_el).css({opacity:0});
+                        $(_el).css({opacity:0, zIndex: 98});
                     } else {
                         __.scaleCrop(_el);
-                        // __.centerX($(_el));
-                        // __.centerY($(_el));
+                        __.centerX($(_el));
+                        __.centerY($(_el));
+                        $(_el).css({zIndex: 100});
                     }
                 });
             },
@@ -88,23 +90,42 @@
                     currentHeight = currentImg.height(),
                     currentTop = currentLi.css('top'),
                     currentLeft = currentLi.css('left');
-                // scalecrop next slide
+                
+                // If we want the new slide to 'push' the old slide out.
+                if (_o.animType == "sidebyside") {
+                    console.log("sidebyside");
+                    // set left of next slide to the right edge of the current slide
+                    nextLi.css({
+                        left:(parseInt(currentLeft.replace("px", ""))+currentWidth)+"px",
+                        opacity:1
+                    });
+                    // determine where the top and left will animate to for the next slide.
+                    var nextStopLeft = ((0 - (nextWidth / 2)) + ($(window).width() / 2)).toString();
+                    // figure where top and left will animate to for current slide
+                    var currentStopLeft = nextStopLeft - currentWidth;
+                    nextLi.animate({left:nextStopLeft+"px"}, _o.animationTime, _o.easing);
+                    currentLi.animate({left:currentStopLeft+"px"}, _o.animationTime, _o.easing, function() {
+                        currentLi.css({opacity:0});
+                        _o.current = nextIndex;
+                        _o.sliding = false;
+                    });
+                } else {
+                    console.log("reveal");
+                    // 'reveal' old slide underneath new one.
+                    __.centerX(nextLi);
+                    nextLi.css({zIndex:99,opacity:1});
+                    console.log("set opacity of next to 1");
+                    var currentStopLeft = parseInt(nextLi.css("left").replace("px", "")) - currentWidth;
+                    currentLi.animate({left:currentStopLeft+"px"}, _o.animationTime, _o.easing, function() {
+                        console.log("done animating");
+                        currentLi.css({opacity:0, zIndex:98});
+                        nextLi.css({zIndex:100});
+                        _o.current = nextIndex;
+                        _o.sliding = false;
+                    });
 
-                // set left of next slide to the right edge of the current slide
-                nextLi.css({
-                    left:(parseInt(currentLeft.replace("px", ""))+currentWidth)+"px",
-                    opacity:1
-                });
-                // determine where the top and left will animate to for the next slide.
-                var nextStopLeft = ((0 - (nextWidth / 2)) + ($(window).width() / 2)).toString();
-                // figure where top and left will animate to for current slide
-                var currentStopLeft = nextStopLeft - currentWidth;
-                nextLi.animate({left:nextStopLeft+"px"}, _o.animationTime, _o.easing);
-                currentLi.animate({left:currentStopLeft+"px"}, _o.animationTime, _o.easing, function() {
-                    currentLi.css({opacity:0});
-                    _o.current = nextIndex;
-                    _o.sliding = false;
-                });
+                }
+
             },
             
             handler: function(el) {
