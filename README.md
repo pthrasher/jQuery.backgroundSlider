@@ -19,6 +19,10 @@ tl;dr
 c'mon now... I didn't type that much... just read it.
 
 
+demos
+-----
+http://pthrasher.github.com/jQuery.backgroundSlider/
+
 
 requirements
 ------------
