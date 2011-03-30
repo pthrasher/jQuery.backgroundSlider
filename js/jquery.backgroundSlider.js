@@ -54,18 +54,23 @@
             },
             showFirstSlide: function(el) {
                 $(el.find('li')).each(function(index, _el) {
-                    $(_el).css({
+                    var $_el = $(_el);
+                    $_el.css({
                         position: 'absolute',
                         top: "0px",
                         left:"0px"
                     });
                     if (index != _o.current) {
-                        $(_el).css({opacity:0, zIndex: 98});
+                        console.log("fixing " + index);
+                        $_el.css({opacity:0, zIndex: 98});
                     } else {
-                        __.scaleCrop(_el);
-                        __.centerX($(_el));
-                        __.centerY($(_el));
-                        $(_el).css({zIndex: 100});
+                        console.log("fixing first");
+                        console.log($_el.css("top"), $_el.css("left"), $_el.width(), $_el.height());
+                        __.scaleCrop($_el);
+                        __.centerX($_el);
+                        __.centerY($_el);
+                        $_el.css({zIndex: 100});
+                        console.log($_el.css("top"), $_el.css("left"), $_el.width(), $_el.height());
                     }
                 });
             },
