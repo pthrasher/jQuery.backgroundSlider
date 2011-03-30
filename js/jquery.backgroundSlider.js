@@ -52,6 +52,14 @@
     				top:((0 - (iH / 2)) + (wH / 2)).toString() + "px"
                 });
             },
+            matchInnerOuter: function(li) {
+                var $li = $(li),
+                    img = $li.find('img:first')),
+            	    iH = img.height(),
+            	    iW = img.width();
+            	$li.width(iw);
+            	$li.height(ih);
+            },
             showFirstSlide: function(el) {
                 $(el.find('li')).each(function(index, _el) {
                     var $_el = $(_el);
@@ -60,6 +68,7 @@
                         top: "0px",
                         left:"0px"
                     });
+                    __.matchInnerOuter($_el);
                     if (index != _o.current) {
                         console.log("fixing " + index);
                         $_el.css({opacity:0, zIndex: 98});
