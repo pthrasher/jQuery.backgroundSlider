@@ -27,7 +27,7 @@
 	a:visited {  }
 	a:hover, a:focus { color: #d3a459; text-decoration: none; }
 	a *, button * { cursor: pointer; }
-	hr { display: none; }
+/*	hr { display: none; }*/
 	small { font-size: 90%; }
 	input, select, button, textarea, option { font-family: Arial, "Lucida Grande", "Lucida Sans Unicode", Arial, Verdana, sans-serif; font-size: 100%; }
 	button, label, select, option, input[type=submit] { cursor: pointer; }
@@ -85,34 +85,36 @@
 </style>
 	</head>
 <body>
-	
-<h1>Demos</h1>	
+
+<h1>jQuery.backgroundSlider</h1>
+
+<h2>Demos</h2>	
 Reveal Mode: <a href="reveal.html">here</a>
 Side by Side Mode: <a href="sidebyside.html">here</a>
-
-<h1>Get it</h1>
+<hr />
+<h2>Get it</h2>
 <a href="https://github.com/downloads/pthrasher/jQuery.backgroundSlider/1.0.zip">Version 1.0</a>
-
-<h1>Problems</h1>
+<hr />
+<h2>Problems?</h2>
 <a href="https://github.com/pthrasher/jQuery.backgroundSlider/issues">add</a> add an issue.
-
-<h1>Docs</h1>
-
-<h2 id="whatdoesitdo">What does it do?</h2>
+<hr />
+<hr />
+<h2>Docs</h2>
+<h3 id="whatdoesitdo">What does it do?</h3>
 
 <p>Well&#8230; You point it at a UL full of LI&#8217;s each with a single image in it, and it will scale, crop, and center them as your background, and rotate through them like a slideshow. It will also fix all of it&#8217;s dimensions and positioning on resize.</p>
 
-<h2 id="whynotx">Why not X?</h2>
+<h3 id="whynotx">Why not X?</h3>
 
 <p>Because X doesn&#8217;t scale and crop. The general consensus on how to set a picture as a full bg image is to just set the width to 100% in css. The problem with this is that it allows you to have open space if you change the browser shape to be out of ratio with the image. Another issue, is that the top and left will always be at 0,0. </p>
 
 <p>With my script, the image will always be equal to, or just bigger than the dimensions of the window. The middle of the image will also, always be affixed to the middle of the window. It&#8217;s very pleasant, you should check it out.</p>
 
-<h2 id="tldr">tl;dr</h2>
+<h3 id="tldr">tl;dr</h3>
 
 <p>c&#8217;mon now&#8230; I didn&#8217;t type that much&#8230; just read it.</p>
 
-<h2 id="requirements">requirements</h2>
+<h3 id="requirements">requirements</h3>
 
 <ul>
 <li>jQuery (DUH!)</li>
@@ -127,7 +129,7 @@ Side by Side Mode: <a href="sidebyside.html">here</a>
 });
 </code></pre>
 
-<h2 id="possibleoptions">Possible options</h2>
+<h3 id="possibleoptions">Possible options</h3>
 
 <ul>
 <li>easing: specify the easing (default: &#8220;linear&#8221;)</li>
