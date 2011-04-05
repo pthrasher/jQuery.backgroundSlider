@@ -166,7 +166,7 @@
         return this.each(function(index, el) {
             $el = $(el);
             $el.css({
-                position:'absolute',
+                position:'fixed',
                 top: '0px',
                 left: '0px'
             });
