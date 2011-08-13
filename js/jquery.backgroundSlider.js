@@ -76,6 +76,7 @@
                             __.scaleCrop($_el);
                             __.centerX($_el);
                             __.centerY($_el);
+                            __.matchInnerOuter($_el);
                             _o.sliding = true;
                             __.switchHandler($el);
                             _o.sliding = false;
@@ -95,7 +96,8 @@
                     nextImg = nextLi.find('img:first');
                 __.scaleCrop(nextLi);
                 // centerY next slide
-                __.centerY(nextLi);    
+                __.centerY(nextLi);  
+                __.matchInnerOuter(nextLi);  
                 var nextWidth = nextImg.width(),
                     nextHeight = nextImg.height(),
                 // get dimensions / top left of current slide
@@ -164,7 +166,7 @@
         return this.each(function(index, el) {
             $el = $(el);
             $el.css({
-                position:'absolute',
+                position:'fixed',
                 top: '0px',
                 left: '0px'
             });
