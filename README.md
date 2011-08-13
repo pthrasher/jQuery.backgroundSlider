@@ -24,6 +24,10 @@ demos
 [http://pthrasher.github.com/jQuery.backgroundSlider/](http://pthrasher.github.com/jQuery.backgroundSlider/)
 
 
+problems
+--------
+Just add an issue, or email me at philip.thrasher _at_ gmail _dot_ com
+
 requirements
 ------------
 
