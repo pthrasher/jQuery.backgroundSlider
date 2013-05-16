@@ -1,51 +1,39 @@
 <!DOCTYPE HTML>
 <html lang="en-US">
 <head>
-	<meta charset="UTF-8">
-	<title></title>
-	<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/jquery-ui.js" type="text/javascript" charset="utf-8"></script>
-	<script src="js/jquery.backgroundSlider.js" type="text/javascript" charset="utf-8"></script>
-	<script type="text/javascript" charset="utf-8">
-		$(function() {
-			$('#slider').backgroundSlider({
-	    	        easing: "easeInOutExpo",
-	    	        animationTime: 2000
-    	    });
-		});
-	</script>
-	<style type="text/css" media="screen">
-		body {
-			margin: 0;
-			padding: 0;
-		}
-		#slider {
-			list-style: none;
-			margin: 0;
-			padding: 0;
-			overflow: hidden;
-			width:100%;
-			height:100%;
-		}
-		#slider li {
-			list-style: none;
-			margin: 0;
-			padding: 0;
-		}
-	</style>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/jquery-ui.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/jquery.backgroundSlider.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(function() {
+            $('#slider').backgroundSlider({
+                    easing: "easeInOutExpo",
+                    animationTime: 2000,
+                    injectStyles: true
+            });
+        });
+    </script>
+    <style type="text/css" media="screen">
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
 </head>
 <body>
-	<ul id="slider">
-		<li><img src="img/01.jpg" /></li>
-		<li><img src="img/02.jpg" /></li>
-		<li><img src="img/03.jpg" /></li>
-		<li><img src="img/04.jpg" /></li>
-		<li><img src="img/05.jpg" /></li>
-		<li><img src="img/06.jpg" /></li>
-		<li><img src="img/07.jpg" /></li>
-		<li><img src="img/08.jpg" /></li>
-		<li><img src="img/09.jpg" /></li>
-		<li><img src="img/10.jpg" /></li>
-	</ul>
+    <ul id="slider">
+        <li><img src="img/01.jpg" /></li>
+        <li><img src="img/02.jpg" /></li>
+        <li><img src="img/03.jpg" /></li>
+        <li><img src="img/04.jpg" /></li>
+        <li><img src="img/05.jpg" /></li>
+        <li><img src="img/06.jpg" /></li>
+        <li><img src="img/07.jpg" /></li>
+        <li><img src="img/08.jpg" /></li>
+        <li><img src="img/09.jpg" /></li>
+        <li><img src="img/10.jpg" /></li>
+    </ul>
 </body>
 </html>
