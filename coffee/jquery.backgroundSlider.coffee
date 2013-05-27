@@ -1,4 +1,5 @@
 $ = window.jQuery
+$w = $ window
 
 debounce = (func, wait, immediate) ->
 
@@ -20,19 +21,17 @@ debounce = (func, wait, immediate) ->
         if callNow
             func.apply context, args
 
-
 class WindowResize
     constructor: ->
-        @$w = $ window
         @handlers = []
-        @windowWidth = @$w.width()
-        @windowHeight = @$w.height()
+        @windowWidth = $w.width()
+        @windowHeight = $w.height()
         @handle = debounce @_handle, 150
-        @$w.resize @handle
+        $w.resize @handle
 
     _handle: =>
-        @windowWidth = @$w.width()
-        @windowHeight = @$w.height()
+        @windowWidth = $w.width()
+        @windowHeight = $w.height()
 
         for handler in @handlers
             handler.call handler, @windowWidth, @windowHeight
@@ -67,28 +66,26 @@ class BackgroundSlider
     constructor: (@el, @opts) ->
         @$el = $ @el
         @lis = $ 'li', @$el
-        @imgs = $ 'img', @lis
+        @imgEls = $ 'img', @lis
+        @imgs = []
 
-        if @opts.injectStyles
-            @setBaseStyles()
+        # if @opts.injectStyles
+        #     @setBaseStyles()
 
         @ready = false
-        @$w = $ window
-        @$w.load @getOriginalImgSizes
+        @getOriginalImgSizes()
 
         @slideNum = @opts.current
         @animType = @opts.animType.toLowerCase()
 
-        firstSlide = @lis[@slideNum]
+        @origpos = @$el.css 'position'
+        @origpostop = @$el.css 'top'
+        @origposleft = @$el.css 'left'
+        @$el.css
+            position: 'fixed'
+            top: '-30000px'
+            left: '-30000px'
 
-        $firstSlide = $ firstSlide
-        $firstSlide.css
-            zIndex: 10
-            display: 'block'
-
-        @currentSlide = $firstSlide
-
-        setInterval @nextSlide, @opts.delay
 
     getSlide: =>
         if @slideNum > @lis.length
@@ -105,23 +102,84 @@ class BackgroundSlider
             left: '0px'
 
         do (newSlide, oldSlide) =>
+            console.log 'newSlide', newSlide, 'oldSlide', oldSlide
 
             oldSlide.animate
-                left: "-#{@$w.width()}px"
+                left: "-#{$w.width()}px"
             ,
                 easing: @opts.easing
                 duration: @opts.animationTime
-            , =>
-                oldSlide.css
-                    display: 'none'
-                    zIndex: 1
+                always: =>
+                    console.log 'oldSlide', oldSlide
+                    oldSlide.css
+                        display: 'none'
+                        zIndex: 1
 
-                newSlide.css
-                    zIndex: 10
+                    newSlide.css
+                        zIndex: 10
+
+    anim_fade: (newSlide, oldSlide) =>
+        newSlide.css
+            zIndex: 5
+            display: 'block'
+            opacity: 1
+
+        oldSlide.css
+            opacity: 1
+            display: 'block'
+            zIndex: 10
+
+        do (newSlide, oldSlide) =>
+            oldSlide.animate
+                opacity: 0
+            ,
+                easing: @opts.easing
+                duration: @opts.animationTime
+                always: =>
+                    oldSlide.css
+                        display: 'none'
+                        zIndex: 1
+
+                    newSlide.css
+                        zIndex: 10
+
+    anim_sidebyside: (newSlide, oldSlide) =>
+        newSlide.css
+            zIndex: 5
+            display: 'block'
+            left: "#{$w.width()}px"
+            top: '0px'
+
+        oldSlide.css
+            display: 'block'
+            zIndex: 10
+            left: "0px"
+            top: '0px'
+
+        do (newSlide, oldSlide) =>
+            oldSlide.animate
+                left: "-#{$w.width()}px"
+            ,
+                easing: @opts.easing
+                duration: @opts.animationTime
+                always: =>
+                    oldSlide.css
+                        display: 'none'
+                        zIndex: 1
+
+            newSlide.animate
+                left: '0px'
+            ,
+                easing: @opts.easing
+                duration: @opts.animationTime
+                always: =>
+                    newSlide.css
+                        zIndex: 10
 
     nextSlide: =>
         oldSlide = @currentSlide
         newSlide = $ @getSlide()
+        @updateImgs $w.width(), $w.height()
 
         @["anim_#{@animType}"] newSlide, oldSlide
 
@@ -152,28 +210,57 @@ class BackgroundSlider
             overflow: 'hidden'
             zIndex: 1
 
-        @imgs.css
+        @imgEls.css
             position: 'absolute'
             top: '0'
             left: '0'
 
     getOriginalImgSizes: =>
         imgs = []
-        ww = @$w.width()
-        wh = @$w.height()
+        ww = $w.width()
+        wh = $w.height()
 
-        for img in @imgs
+        ready = true
+        for img in @imgEls
             $img = $ img
 
+            iw = $img.width()
+            ih = $img.height()
+
+            if iw is 0 or ih is 0
+                ready = false
+
             imgs.push
-                origWidth: $img.width()
-                origHeight: $img.height()
+                origWidth: iw
+                origHeight: ih
                 $img: $img
+
+        unless ready
+            return setTimeout @getOriginalImgSizes, 100
 
         @imgs = imgs
         @ready = true
         windowResize.addListener @handleResize
-        @updateImgs(@$w.width(), @$w.height())
+        @updateImgs($w.width(), $w.height())
+
+        @$el.css
+            position: @origpos
+            top: @origpostop
+            left: @origposleft
+
+        if @opts.injectStyles
+            @setBaseStyles()
+
+        firstSlide = @lis[@slideNum]
+
+        $firstSlide = $ firstSlide
+        $firstSlide.css
+            zIndex: 10
+            display: 'block'
+
+        @currentSlide = $firstSlide
+
+        setInterval @nextSlide, @opts.delay
 
 
     handleResize: (w, h) =>
@@ -189,6 +276,19 @@ class BackgroundSlider
         $img = img.$img
         iw = img.origWidth
         ih = img.origHeight
+
+        if iw is 0 or ih is 0
+            console.log 'iw', iw, 'ih', ih
+            # WHAT THE HELL??
+            # Okay... So, the browser was being a dick earlier. We need to dbl
+            # check our w and h of this img real quick.
+            $img.width null
+            $img.height null
+            $img.css
+                height: 'auto'
+                width: 'auto'
+            iw = $img.width()
+            ih = $img.height()
 
         #scale and crop
         highestScale = Math.max (w / iw), (h / ih)

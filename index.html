@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
-    <script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
-    <script src="js/jquery-ui.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/jquery-1.10.0.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/jquery-ui.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/jquery.backgroundSlider.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">
         $(function() {
             $('#slider').backgroundSlider({
                     easing: "easeInOutExpo",
                     animationTime: 2000,
-                    injectStyles: true
+                    injectStyles: true,
+                    animType: 'sidebyside'
             });
         });
     </script>
