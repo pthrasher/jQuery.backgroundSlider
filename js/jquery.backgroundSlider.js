@@ -1,177 +1,407 @@
-(function($) {
-    $.fn.backgroundSlider = function($o) {
-        var _o = $.extend({
-            easing: "linear",
-            delay: 6000,
-            animationTime: 600,
-            current: 0,
-            sliding: false,
-            animType: "reveal"
-        }, $o),
-        
-        __ = {
-            scaleCrop: function(li) {
-                var img = $($(li).find('img:first')),
-            	    wW = $(window).width(),
-            	    wH = $(window).height(),
-            	    iH = img.height(),
-            	    iW = img.width();
-            	if (!(((iH < wH || iW < wW) || (iH > wH && iW > wW)) && (iH > 0 && iW > 0)))
-            	{
-            		//return;
-            	}
-            	var highestScale,
-            	    widthScale = wW / iW,
-            	    heightScale = wH / iH;
-            	highestScale = Math.max(heightScale, widthScale);
-            	newWidth = iW * highestScale;
-            	newHeight = iH * highestScale;
-            	img.css({
-                	width:newWidth.toString()+"px",
-                	height:newHeight.toString()+"px"
-            	});
-            },
-            
-            center: function(li) {
-                __.centerX($(li));
-                __.centerY($(li));
-            },
-            centerX: function(li) {
-                var img = $(li.find('img:first')),
-        	        wW = $(window).width(),
-        	        iW = img.width();                
-                li.css({
-    				left:((0 - (iW / 2)) + (wW / 2)).toString() + "px"
-                });
-            },
-            centerY: function(li) {
-                var img = $(li.find('img:first')),
-            	    wH = $(window).height(),
-            	    iH = img.height();
-                li.css({
-    				top:((0 - (iH / 2)) + (wH / 2)).toString() + "px"
-                });
-            },
-            matchInnerOuter: function(li) {
-                var $li = $(li),
-                    img = $($li.find('img:first')),
-            	    iH = img.height(),
-            	    iW = img.width();
-            	$li.width(iW);
-            	$li.height(iH);
-            },
-            showFirstSlide: function(el) {
-                var $el = $(el);
-                $(el.find('li')).each(function(index, _el) {
-                    var $_el = $(_el);
-                    $_el.css({
-                        position: 'absolute',
-                        top: "0px",
-                        left:"0px"
-                    });
-                    if (index != _o.current) {
-                        $_el.css({opacity:0, zIndex: 98});
-                    } else {
-                        $(window).load(function() {
-                            __.scaleCrop($_el);
-                            __.centerX($_el);
-                            __.centerY($_el);
-                            __.matchInnerOuter($_el);
-                            _o.sliding = true;
-                            __.switchHandler($el);
-                            _o.sliding = false;
-                        });
-                        $_el.css({zIndex: 100});
-                    }
-                });
-            },
-            
-            nextSlide: function(el) {
-                _o.sliding = true;
-                // get li's
-                var LIs = $(el.find('li')),
-                // get next slide li
-                    nextIndex = (_o.current+1)%LIs.length,
-                    nextLi = $(LIs[nextIndex]),
-                    nextImg = nextLi.find('img:first');
-                __.scaleCrop(nextLi);
-                // centerY next slide
-                __.centerY(nextLi);  
-                __.matchInnerOuter(nextLi);  
-                var nextWidth = nextImg.width(),
-                    nextHeight = nextImg.height(),
-                // get dimensions / top left of current slide
-                    currentLi = $(LIs[_o.current]),
-                    currentImg = currentLi.find('img:first'),
-                    currentWidth = currentImg.width(),
-                    currentHeight = currentImg.height(),
-                    currentTop = currentLi.css('top'),
-                    currentLeft = currentLi.css('left');
-                
-                // If we want the new slide to 'push' the old slide out.
-                if (_o.animType == "sidebyside") {
-                    // set left of next slide to the right edge of the current slide
-                    nextLi.css({
-                        left:(parseInt(currentLeft.replace("px", ""))+currentWidth)+"px",
-                        opacity:1
-                    });
-                    // determine where the top and left will animate to for the next slide.
-                    var nextStopLeft = ((0 - (nextWidth / 2)) + ($(window).width() / 2)).toString();
-                    // figure where top and left will animate to for current slide
-                    var currentStopLeft = nextStopLeft - currentWidth;
-                    nextLi.animate({left:nextStopLeft+"px"}, _o.animationTime, _o.easing);
-                    currentLi.animate({left:currentStopLeft+"px"}, _o.animationTime, _o.easing, function() {
-                        currentLi.css({opacity:0});
-                        _o.current = nextIndex;
-                        _o.sliding = false;
-                    });
-                } else {
-                    // 'reveal' old slide underneath new one.
-                    __.centerX(nextLi);
-                    nextLi.css({zIndex:99,opacity:1});
-                    var currentStopLeft = parseInt(nextLi.css("left").replace("px", "")) - currentWidth;
-                    currentLi.animate({left:currentStopLeft+"px"}, _o.animationTime, _o.easing, function() {
-                        currentLi.css({opacity:0, zIndex:98});
-                        nextLi.css({zIndex:100});
-                        _o.current = nextIndex;
-                        _o.sliding = false;
-                    });
+// Generated by CoffeeScript 1.6.2
+(function() {
+  var $, $w, BackgroundSlider, WindowResize, debounce, windowResize,
+    __slice = [].slice,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-                }
+  $ = window.jQuery;
 
-            },
-            
-            handler: function(el) {
-                var _tmr = null;
-                $(window).bind('resize.backgroundSlider', function() {
-                    if (_tmr) {
-                        clearTimeout(_tmr);
-                    }
-                    _tmr = setTimeout(function() { var _li = $($(el).find('li')[_o.current]); __.scaleCrop(_li); __.center(_li); }, 250)
-                });
-            },
-            
-            switchHandler: function(el) {
-                var _sTmr = null;
-                if (_sTmr) {
-                    clearTimeout(_sTmr);
-                }
-                if (!_o.sliding) {
-                   __.nextSlide(el);
-                }
-                _sTmr = setTimeout(function() { __.switchHandler(el); }, _o.delay)
-            }
-        };
+  $w = $(window);
 
-        return this.each(function(index, el) {
-            $el = $(el);
-            $el.css({
-                position:'fixed',
-                top: '0px',
-                left: '0px'
-            });
-            __.showFirstSlide($el);
-            __.handler($el);
-        });
+  debounce = function(func, wait, immediate) {
+    var timeout;
+
+    timeout = null;
+    return function() {
+      var args, callNow, context, later;
+
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      context = this;
+      later = function() {
+        timeout = null;
+        if (!immediate) {
+          return func.apply(context, args);
+        }
+      };
+      callNow = immediate && !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+      if (callNow) {
+        return func.apply(context, args);
+      }
     };
-})(jQuery);
+  };
+
+  WindowResize = (function() {
+    function WindowResize() {
+      this.removeListener = __bind(this.removeListener, this);
+      this.addListener = __bind(this.addListener, this);
+      this._handle = __bind(this._handle, this);      this.handlers = [];
+      this.windowWidth = $w.width();
+      this.windowHeight = $w.height();
+      this.handle = debounce(this._handle, 150);
+      $w.resize(this.handle);
+    }
+
+    WindowResize.prototype._handle = function() {
+      var handler, _i, _len, _ref, _results;
+
+      this.windowWidth = $w.width();
+      this.windowHeight = $w.height();
+      _ref = this.handlers;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        handler = _ref[_i];
+        _results.push(handler.call(handler, this.windowWidth, this.windowHeight));
+      }
+      return _results;
+    };
+
+    WindowResize.prototype.addListener = function(hndlr) {
+      var handler, _i, _len, _ref;
+
+      _ref = this.handlers;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        handler = _ref[_i];
+        if (hndlr === handler) {
+          return false;
+        }
+      }
+      this.handlers.push(hndlr);
+      hndlr.call(hndlr, this.windowWidth, this.windowHeight);
+      return true;
+    };
+
+    WindowResize.prototype.removeListener = function(hndlr) {
+      var handler, removed, _handlers, _i, _len, _ref;
+
+      _handlers = [];
+      removed = false;
+      _ref = this.handlers;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        handler = _ref[_i];
+        if (handler !== hndlr) {
+          _handlers.push(handler);
+        } else {
+          removed = true;
+        }
+      }
+      this.handlers = _handlers;
+      return removed;
+    };
+
+    return WindowResize;
+
+  })();
+
+  windowResize = new WindowResize;
+
+  BackgroundSlider = (function() {
+    function BackgroundSlider(el, opts) {
+      this.el = el;
+      this.opts = opts;
+      this.handleResize = __bind(this.handleResize, this);
+      this.getOriginalImgSizes = __bind(this.getOriginalImgSizes, this);
+      this.nextSlide = __bind(this.nextSlide, this);
+      this.anim_sidebyside = __bind(this.anim_sidebyside, this);
+      this.anim_fade = __bind(this.anim_fade, this);
+      this.anim_reveal = __bind(this.anim_reveal, this);
+      this.getSlide = __bind(this.getSlide, this);
+      this.$el = $(this.el);
+      this.lis = $('li', this.$el);
+      this.imgEls = $('img', this.lis);
+      this.imgs = [];
+      this.ready = false;
+      this.getOriginalImgSizes();
+      this.slideNum = this.opts.current;
+      this.animType = this.opts.animType.toLowerCase();
+      this.origpos = this.$el.css('position');
+      this.origpostop = this.$el.css('top');
+      this.origposleft = this.$el.css('left');
+      this.$el.css({
+        position: 'fixed',
+        top: '-30000px',
+        left: '-30000px'
+      });
+    }
+
+    BackgroundSlider.prototype.getSlide = function() {
+      if (this.slideNum > this.lis.length) {
+        this.slideNum = 0;
+      } else {
+        this.slideNum += 1;
+      }
+      return this.lis[this.slideNum];
+    };
+
+    BackgroundSlider.prototype.anim_reveal = function(newSlide, oldSlide) {
+      var _this = this;
+
+      newSlide.css({
+        zIndex: 5,
+        display: 'block',
+        left: '0px'
+      });
+      return (function(newSlide, oldSlide) {
+        console.log('newSlide', newSlide, 'oldSlide', oldSlide);
+        return oldSlide.animate({
+          left: "-" + ($w.width()) + "px"
+        }, {
+          easing: _this.opts.easing,
+          duration: _this.opts.animationTime,
+          always: function() {
+            console.log('oldSlide', oldSlide);
+            oldSlide.css({
+              display: 'none',
+              zIndex: 1
+            });
+            return newSlide.css({
+              zIndex: 10
+            });
+          }
+        });
+      })(newSlide, oldSlide);
+    };
+
+    BackgroundSlider.prototype.anim_fade = function(newSlide, oldSlide) {
+      var _this = this;
+
+      newSlide.css({
+        zIndex: 5,
+        display: 'block',
+        opacity: 1
+      });
+      oldSlide.css({
+        opacity: 1,
+        display: 'block',
+        zIndex: 10
+      });
+      return (function(newSlide, oldSlide) {
+        return oldSlide.animate({
+          opacity: 0
+        }, {
+          easing: _this.opts.easing,
+          duration: _this.opts.animationTime,
+          always: function() {
+            oldSlide.css({
+              display: 'none',
+              zIndex: 1
+            });
+            return newSlide.css({
+              zIndex: 10
+            });
+          }
+        });
+      })(newSlide, oldSlide);
+    };
+
+    BackgroundSlider.prototype.anim_sidebyside = function(newSlide, oldSlide) {
+      var _this = this;
+
+      newSlide.css({
+        zIndex: 5,
+        display: 'block',
+        left: "" + ($w.width()) + "px",
+        top: '0px'
+      });
+      oldSlide.css({
+        display: 'block',
+        zIndex: 10,
+        left: "0px",
+        top: '0px'
+      });
+      return (function(newSlide, oldSlide) {
+        oldSlide.animate({
+          left: "-" + ($w.width()) + "px"
+        }, {
+          easing: _this.opts.easing,
+          duration: _this.opts.animationTime,
+          always: function() {
+            return oldSlide.css({
+              display: 'none',
+              zIndex: 1
+            });
+          }
+        });
+        return newSlide.animate({
+          left: '0px'
+        }, {
+          easing: _this.opts.easing,
+          duration: _this.opts.animationTime,
+          always: function() {
+            return newSlide.css({
+              zIndex: 10
+            });
+          }
+        });
+      })(newSlide, oldSlide);
+    };
+
+    BackgroundSlider.prototype.nextSlide = function() {
+      var newSlide, oldSlide;
+
+      oldSlide = this.currentSlide;
+      newSlide = $(this.getSlide());
+      this.updateImgs($w.width(), $w.height());
+      this["anim_" + this.animType](newSlide, oldSlide);
+      return this.currentSlide = newSlide;
+    };
+
+    BackgroundSlider.prototype.setBaseStyles = function() {
+      this.$el.css({
+        listStyle: 'none',
+        margin: '0',
+        padding: '0',
+        overflow: 'hidden',
+        width: '100%',
+        height: '100%',
+        position: 'fixed',
+        top: '0',
+        left: '0'
+      });
+      this.lis.css({
+        listStyle: 'none',
+        margin: '0',
+        padding: '0',
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        display: 'none',
+        overflow: 'hidden',
+        zIndex: 1
+      });
+      return this.imgEls.css({
+        position: 'absolute',
+        top: '0',
+        left: '0'
+      });
+    };
+
+    BackgroundSlider.prototype.getOriginalImgSizes = function() {
+      var $firstSlide, $img, firstSlide, ih, img, imgs, iw, ready, wh, ww, _i, _len, _ref;
+
+      imgs = [];
+      ww = $w.width();
+      wh = $w.height();
+      ready = true;
+      _ref = this.imgEls;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        img = _ref[_i];
+        $img = $(img);
+        iw = $img.width();
+        ih = $img.height();
+        if (iw === 0 || ih === 0) {
+          ready = false;
+        }
+        imgs.push({
+          origWidth: iw,
+          origHeight: ih,
+          $img: $img
+        });
+      }
+      if (!ready) {
+        return setTimeout(this.getOriginalImgSizes, 100);
+      }
+      this.imgs = imgs;
+      this.ready = true;
+      windowResize.addListener(this.handleResize);
+      this.updateImgs($w.width(), $w.height());
+      this.$el.css({
+        position: this.origpos,
+        top: this.origpostop,
+        left: this.origposleft
+      });
+      if (this.opts.injectStyles) {
+        this.setBaseStyles();
+      }
+      firstSlide = this.lis[this.slideNum];
+      $firstSlide = $(firstSlide);
+      $firstSlide.css({
+        zIndex: 10,
+        display: 'block'
+      });
+      this.currentSlide = $firstSlide;
+      return setInterval(this.nextSlide, this.opts.delay);
+    };
+
+    BackgroundSlider.prototype.handleResize = function(w, h) {
+      if (!this.ready) {
+        return;
+      }
+      return this.updateImgs(w, h);
+    };
+
+    BackgroundSlider.prototype.updateImgs = function(w, h) {
+      var img, _i, _len, _ref, _results;
+
+      _ref = this.imgs;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        img = _ref[_i];
+        _results.push(this.updateImg(w, h, img));
+      }
+      return _results;
+    };
+
+    BackgroundSlider.prototype.updateImg = function(w, h, img) {
+      var $img, height, highestScale, ih, iw, left, top, width;
+
+      $img = img.$img;
+      iw = img.origWidth;
+      ih = img.origHeight;
+      if (iw === 0 || ih === 0) {
+        console.log('iw', iw, 'ih', ih);
+        $img.width(null);
+        $img.height(null);
+        $img.css({
+          height: 'auto',
+          width: 'auto'
+        });
+        iw = $img.width();
+        ih = $img.height();
+      }
+      highestScale = Math.max(w / iw, h / ih);
+      width = Math.round(iw * highestScale);
+      height = Math.round(ih * highestScale);
+      left = Math.round((w / 2) - (width / 2));
+      top = Math.round((h / 2) - (height / 2));
+      $img.css({
+        width: "" + width + "px",
+        height: "" + height + "px",
+        top: "" + top + "px",
+        left: "" + left + "px"
+      });
+      return void 0;
+    };
+
+    return BackgroundSlider;
+
+  })();
+
+  $.fn.backgroundSlider = function($o) {
+    var _o;
+
+    _o = $.extend({
+      easing: 'linear',
+      delay: 6000,
+      animationTime: 600,
+      current: 0,
+      sliding: false,
+      animType: 'reveal',
+      injectStyles: false
+    }, $o);
+    return this.each(function(i, el) {
+      var slider;
+
+      slider = new BackgroundSlider(el, _o);
+      return $(el).data('slider', slider);
+    });
+  };
+
+}).call(this);
+
+/*
+//@ sourceMappingURL=jquery.backgroundSlider.map
+*/
