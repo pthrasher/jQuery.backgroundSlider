@@ -102,7 +102,6 @@ class BackgroundSlider
             left: '0px'
 
         do (newSlide, oldSlide) =>
-            console.log 'newSlide', newSlide, 'oldSlide', oldSlide
 
             oldSlide.animate
                 left: "-#{$w.width()}px"
@@ -110,7 +109,6 @@ class BackgroundSlider
                 easing: @opts.easing
                 duration: @opts.animationTime
                 always: =>
-                    console.log 'oldSlide', oldSlide
                     oldSlide.css
                         display: 'none'
                         zIndex: 1
@@ -278,7 +276,6 @@ class BackgroundSlider
         ih = img.origHeight
 
         if iw is 0 or ih is 0
-            console.log 'iw', iw, 'ih', ih
             # WHAT THE HELL??
             # Okay... So, the browser was being a dick earlier. We need to dbl
             # check our w and h of this img real quick.
