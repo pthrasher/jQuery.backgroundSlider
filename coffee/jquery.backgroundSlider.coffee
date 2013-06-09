@@ -1,66 +1,41 @@
 $ = window.jQuery
 $w = $ window
 
-debounce = (func, wait, immediate) ->
+hasRAF = true
 
-    timeout = null
+do ->
+    lastTime = 0
+    vendors = ["ms", "moz", "webkit", "o"]
+    x = 0
 
-    (args...) ->
+    while x < vendors.length and not window.requestAnimationFrame
+        window.requestAnimationFrame = window[vendors[x] + "RequestAnimationFrame"]
+        window.cancelAnimationFrame = window[vendors[x] + "CancelAnimationFrame"] or window[vendors[x] + "CancelRequestAnimationFrame"]
+        ++x
 
-        context = @
+    unless window.requestAnimationFrame
+        hasRAF = false
 
-        later = ->
-            timeout = null
-            unless immediate
-                func.apply context, args
-
-        callNow = immediate and not timeout
-        clearTimeout timeout
-        timeout = setTimeout later, wait
-
-        if callNow
-            func.apply context, args
-
-class WindowResize
-    constructor: ->
-        @handlers = []
-        @windowWidth = $w.width()
-        @windowHeight = $w.height()
-        @handle = debounce @_handle, 150
-        $w.resize @handle
-
-    _handle: =>
-        @windowWidth = $w.width()
-        @windowHeight = $w.height()
-
-        for handler in @handlers
-            handler.call handler, @windowWidth, @windowHeight
-
-    addListener: (hndlr) =>
-        # don't allow duplicates
-        for handler in @handlers
-            if hndlr is handler
-                return false
-
-        @handlers.push hndlr
-        # return true because no dupes were found.
-        hndlr.call hndlr, @windowWidth, @windowHeight
-        true
+    unless window.cancelAnimationFrame
+        hasRAF = false
 
 
-    removeListener: (hndlr) =>
-        _handlers = []
-        removed = false
-        for handler in @handlers
-            if handler isnt hndlr
-                _handlers.push handler
-            else
-                removed = true
-        @handlers = _handlers
+do ->
+    return unless hasRAF
+    lastTime = 0
+    running = null
+    animate = (elem) ->
+        if running
+            window.requestAnimationFrame animate, elem
+            jQuery.fx.tick()
 
-        removed
+    jQuery.fx.timer = (timer) ->
+        if timer() and jQuery.timers.push(timer) and not running
+            running = true
+            animate timer.elem
 
-windowResize = new WindowResize
+    jQuery.fx.stop = ->
+        running = false
 
 class BackgroundSlider
     constructor: (@el, @opts) ->
@@ -69,26 +44,23 @@ class BackgroundSlider
         @imgEls = $ 'img', @lis
         @imgs = []
 
-        # if @opts.injectStyles
-        #     @setBaseStyles()
-
-        @ready = false
-        @getOriginalImgSizes()
-
-        @slideNum = @opts.current
-        @animType = @opts.animType.toLowerCase()
-
         @origpos = @$el.css 'position'
         @origpostop = @$el.css 'top'
         @origposleft = @$el.css 'left'
+
         @$el.css
             position: 'fixed'
             top: '-30000px'
             left: '-30000px'
 
+        @ready = false
+        @slideNum = @opts.current
+        @animType = @opts.animType.toLowerCase()
+        @getOriginalImgSizes()
+
 
     getSlide: =>
-        if @slideNum > @lis.length
+        if @slideNum >= @lis.length - 1
             @slideNum = 0
         else
             @slideNum += 1
@@ -145,7 +117,7 @@ class BackgroundSlider
         newSlide.css
             zIndex: 5
             display: 'block'
-            left: "#{$w.width()}px"
+            left: "#{oldSlide.width() + oldSlide.offset().left}px"
             top: '0px'
 
         oldSlide.css
@@ -160,6 +132,7 @@ class BackgroundSlider
             ,
                 easing: @opts.easing
                 duration: @opts.animationTime
+                queue: false
                 always: =>
                     oldSlide.css
                         display: 'none'
@@ -170,6 +143,7 @@ class BackgroundSlider
             ,
                 easing: @opts.easing
                 duration: @opts.animationTime
+                queue: false
                 always: =>
                     newSlide.css
                         zIndex: 10
@@ -177,7 +151,6 @@ class BackgroundSlider
     nextSlide: =>
         oldSlide = @currentSlide
         newSlide = $ @getSlide()
-        @updateImgs $w.width(), $w.height()
 
         @["anim_#{@animType}"] newSlide, oldSlide
 
@@ -215,8 +188,6 @@ class BackgroundSlider
 
     getOriginalImgSizes: =>
         imgs = []
-        ww = $w.width()
-        wh = $w.height()
 
         ready = true
         for img in @imgEls
@@ -238,8 +209,13 @@ class BackgroundSlider
 
         @imgs = imgs
         @ready = true
-        windowResize.addListener @handleResize
-        @updateImgs($w.width(), $w.height())
+        @whenReady()
+
+    whenReady: ->
+        return unless @ready
+
+        $w.resize @handleResize
+        @handleResize()
 
         @$el.css
             position: @origpos
@@ -252,6 +228,7 @@ class BackgroundSlider
         firstSlide = @lis[@slideNum]
 
         $firstSlide = $ firstSlide
+        console.log $($firstSlide).html()
         $firstSlide.css
             zIndex: 10
             display: 'block'
@@ -261,52 +238,32 @@ class BackgroundSlider
         setInterval @nextSlide, @opts.delay
 
 
-    handleResize: (w, h) =>
+    handleResize: (e) =>
         return unless @ready
+        @positionImages $w.width(), $w.height()
 
-        @updateImgs w, h
-
-    updateImgs: (w, h) ->
+    positionImages: (w, h) ->
         for img in @imgs
-            @updateImg w, h, img
+            $img = img.$img
+            iw = img.origWidth
+            ih = img.origHeight
 
-    updateImg: (w, h, img) ->
-        $img = img.$img
-        iw = img.origWidth
-        ih = img.origHeight
+            #scale and crop
+            highestScale = Math.max (w / iw), (h / ih)
+            width = Math.round(iw * highestScale)
+            height = Math.round(ih * highestScale)
 
-        if iw is 0 or ih is 0
-            # WHAT THE HELL??
-            # Okay... So, the browser was being a dick earlier. We need to dbl
-            # check our w and h of this img real quick.
-            $img.width null
-            $img.height null
+            #center
+            left = Math.round((w / 2) - (width / 2))
+            top = Math.round((h / 2) - (height / 2))
+
             $img.css
-                height: 'auto'
-                width: 'auto'
-            iw = $img.width()
-            ih = $img.height()
-
-        #scale and crop
-        highestScale = Math.max (w / iw), (h / ih)
-        width = Math.round(iw * highestScale)
-        height = Math.round(ih * highestScale)
-
-        #center
-        left = Math.round((w / 2) - (width / 2))
-        top = Math.round((h / 2) - (height / 2))
-
-        $img.css
-            width: "#{width}px"
-            height: "#{height}px"
-            top: "#{top}px"
-            left: "#{left}px"
+                width: "#{width}px"
+                height: "#{height}px"
+                top: "#{top}px"
+                left: "#{left}px"
 
         undefined
-
-
-
-
 
 
 $.fn.backgroundSlider = ($o) ->
