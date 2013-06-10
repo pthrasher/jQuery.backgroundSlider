@@ -228,7 +228,6 @@ class BackgroundSlider
         firstSlide = @lis[@slideNum]
 
         $firstSlide = $ firstSlide
-        console.log $($firstSlide).html()
         $firstSlide.css
             zIndex: 10
             display: 'block'
